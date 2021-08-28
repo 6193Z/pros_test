@@ -1,34 +1,19 @@
 #include "main.h"
 
 // DEFINE DEVICES
+/////////////////////////////////////////////
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-pros::Motor front_left_mtr(1);
-pros::Motor front_right_mtr(2);
+pros::Motor FL_wheel(1);
+pros::Motor FR_wheel(2);
 
-pros::Motor back_left_mtr(3);
-pros::Motor back_right_mtr(4);
+pros::Motor BL_wheel(3);
+pros::Motor BR_wheel(4);
 
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_center_button()
-{
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed)
-	{
-		pros::lcd::set_text(2, "I was pressed!");
-	}
-	else
-	{
-		pros::lcd::clear_line(2);
-	}
-}
+pros::ADIButton limitSwitch('a');
+
+/////////////////////////////////////////////
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -40,8 +25,6 @@ void initialize()
 {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
 }
 
 /**
@@ -91,16 +74,30 @@ void autonomous() {}
 
 void opcontrol()
 {
+	pros::lcd::clear();
+
 	while (true)
 	{
 		int joyLY = master.get_analog(ANALOG_LEFT_Y);
 		int joyRY = master.get_analog(ANALOG_RIGHT_Y);
 
-		front_left_mtr.move(joyLY);
-		back_left_mtr.move(joyLY);
+		bool A_btn = master.get_digital(DIGITAL_A);
 
-		front_right_mtr.move(joyRY);
-		back_right_mtr.move(joyRY);
+		FL_wheel.move(joyLY);
+		BL_wheel.move(joyLY);
+
+		FR_wheel.move(joyRY);
+		BR_wheel.move(joyRY);
+
+		if (A_btn)
+		{
+			pros::lcd::set_text(1, "A is pressed");
+		}
+
+		if (limitSwitch.get_value())
+		{
+			pros::lcd::set_text(1, "Ow!!");
+		}
 
 		pros::delay(20);
 	}
