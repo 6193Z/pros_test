@@ -85,5 +85,3 @@ void opcontrol()
 		pros::delay(20);
 	}
 }
-
-// test!!!!!
