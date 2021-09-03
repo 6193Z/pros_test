@@ -5,13 +5,7 @@
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-pros::Motor FL_wheel(1);
-pros::Motor FR_wheel(2);
-
-pros::Motor BL_wheel(3);
-pros::Motor BR_wheel(4);
-
-pros::ADIButton limitSwitch('a');
+pros::Motor motor1(5);
 
 /////////////////////////////////////////////
 
@@ -23,8 +17,8 @@ pros::ADIButton limitSwitch('a');
  */
 void initialize()
 {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+	// pros::lcd::initialize();
+	// pros::lcd::set_text(1, "Hello PROS User!");
 }
 
 /**
@@ -74,29 +68,18 @@ void autonomous() {}
 
 void opcontrol()
 {
-	pros::lcd::clear();
-
 	while (true)
 	{
 		int joyLY = master.get_analog(ANALOG_LEFT_Y);
-		int joyRY = master.get_analog(ANALOG_RIGHT_Y);
-
 		bool A_btn = master.get_digital(DIGITAL_A);
 
-		FL_wheel.move(joyLY);
-		BL_wheel.move(joyLY);
-
-		FR_wheel.move(joyRY);
-		BR_wheel.move(joyRY);
-
-		if (A_btn)
+		if (!A_btn)
 		{
-			pros::lcd::set_text(1, "A is pressed");
+			motor1.move(joyLY);
 		}
-
-		if (limitSwitch.get_value())
+		else // seems redundant but actually prevents motor from spinning infinitely while button A is being pressed.
 		{
-			pros::lcd::set_text(1, "Ow!!");
+			motor1.move(0);
 		}
 
 		pros::delay(20);
