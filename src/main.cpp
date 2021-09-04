@@ -3,7 +3,7 @@
 // DEFINE DEVICES
 /////////////////////////////////////////////
 
-pros::Controller master(pros::E_CONTROLLER_MASTER);
+pros::Controller master(CONTROLLER_MASTER);
 
 pros::Motor motor1(5);
 
@@ -15,11 +15,7 @@ pros::Motor motor1(5);
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-void initialize()
-{
-	// pros::lcd::initialize();
-	// pros::lcd::set_text(1, "Hello PROS User!");
-}
+void initialize() {}
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -73,13 +69,14 @@ void opcontrol()
 		int joyLY = master.get_analog(ANALOG_LEFT_Y);
 		bool A_btn = master.get_digital(DIGITAL_A);
 
-		if (!A_btn)
-		{
-			motor1.move(joyLY);
-		}
-		else // seems redundant but actually prevents motor from spinning infinitely while button A is being pressed.
+		// seems redundant but actually prevents motor from spinning infinitely while button A is being pressed.
+		if (A_btn)
 		{
 			motor1.move(0);
+		}
+		else
+		{
+			motor1.move(joyLY);
 		}
 
 		pros::delay(20);
