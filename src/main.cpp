@@ -1,4 +1,9 @@
 #include "main.h"
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+
+using namespace std;
 
 // DEFINE DEVICES
 /////////////////////////////////////////////
@@ -46,7 +51,40 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous()
+{
+	pros::lcd::initialize();
+
+	float msStop = 5000;
+	float msNow;
+	float t;
+	float curve;
+	int volts;
+
+	while (pros::millis() < msStop)
+	{
+		msNow = pros::millis();
+		t = msNow / msStop * 2 * M_PI;
+		curve = sin(3 * t);
+		volts = floor(127 * curve);
+
+		if (volts < -127 || volts > 127)
+		{
+			pros::lcd::set_text(4, "voltage limit exceded");
+			break;
+		}
+
+		pros::lcd::set_text(1, to_string(t));
+		pros::lcd::set_text(2, to_string(curve));
+		pros::lcd::set_text(3, to_string(volts));
+
+		motor1.move(volts);
+
+		pros::delay(20);
+	}
+
+	motor1.move(0);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -64,12 +102,13 @@ void autonomous() {}
 
 void opcontrol()
 {
+	pros::lcd::clear();
+
 	while (true)
 	{
 		int joyLY = master.get_analog(ANALOG_LEFT_Y);
 		bool A_btn = master.get_digital(DIGITAL_A);
 
-		// seems redundant but actually prevents motor from spinning infinitely while button A is being pressed.
 		if (A_btn)
 		{
 			motor1.move(0);
